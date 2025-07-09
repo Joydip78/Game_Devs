@@ -3,11 +3,11 @@ from tkinter import messagebox
 import random
 
 # Sample word list (you can expand it with a full list)
-WORD_LIST = ['apple', 'grape', 'brick', 'smile', 'flame', 'blush', 'crane', 'drink', 'tiger', 'glory']
+WORD_LIST = ['apple', 'grape', 'brick', 'smile', 'flame', 'field', 'moral', 'blush', 'crane', 'drink', 'tiger', 'glory', 'major']
+
 
 # Choose a random word
 TARGET_WORD = random.choice(WORD_LIST).lower()
-
 # Constants
 WORD_LENGTH = 5
 MAX_ATTEMPTS = 6
@@ -51,6 +51,7 @@ class WordleGUI:
             "ASDFGHJKL",
             "ZXCVBNM"
         ]
+        self.master.bind("<Key>", self.handle_keypress)
 
         self.keyboard_buttons = {}
         for r, row in enumerate(keys):
@@ -67,6 +68,11 @@ class WordleGUI:
         control_frame.grid(row=4, column=0, columnspan=10)
         tk.Button(control_frame, text="Enter", width=8, height=2, command=self.check_guess).grid(row=0, column=0, padx=5)
         tk.Button(control_frame, text="Del", width=8, height=2, command=self.delete_letter).grid(row=0, column=1, padx=5)
+        self.master.bind('<Return>', lambda event: self.check_guess())
+        self.master.bind('<BackSpace>', lambda event: self.delete_letter())
+    def handle_keypress(self, event):
+        if event.char.isalpha() and len(event.char) == 1:
+            self.add_letter(event.char.lower())
 
     def add_letter(self, letter):
         if len(self.current_guess) < WORD_LENGTH:

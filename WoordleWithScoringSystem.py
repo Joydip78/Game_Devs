@@ -125,7 +125,7 @@ class WordleGUI:
     def load_high_score(self):
         if os.path.exists(self.high_score_file):
             with open(self.high_score_file, "r") as f:
-                self.high_score = 0
+                self.high_score = int(f.read())
         else:
             self.high_score = 0
 

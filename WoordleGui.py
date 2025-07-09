@@ -3,7 +3,11 @@ from tkinter import messagebox
 import random
 
 # Sample word list (you can expand it with a full list)
-WORD_LIST = ['apple', 'grape', 'brick', 'smile', 'flame', 'field', 'moral', 'blush', 'crane', 'drink', 'tiger', 'glory', 'major']
+# WORD_LIST = ['apple', 'grape', 'brick', 'smile', 'flame', 'field', 'moral', 'blush', 'crane', 'drink', 'tiger', 'glory', 'major']
+
+# Sample word list (A vast Pool of 5-Letter Words)
+with open("wordlist_fives.txt") as f:
+    WORD_LIST = [w.strip().lower() for w in f if len(w.strip()) == 5]
 
 
 # Choose a random word

@@ -23,7 +23,7 @@ class WordleGUI:
     def __init__(self, master):
         self.master = master
         self.master.title("Wordle Game - GUI")
-        self.master.resizable(False, False)
+        self.master.resizable(False, True)
         self.attempt = 0
         self.entries = [[None]*WORD_LENGTH for _ in range(MAX_ATTEMPTS)]
         self.current_guess = ""
@@ -44,13 +44,15 @@ class WordleGUI:
                 rect = self.canvas.create_rectangle(x1, y1, x2, y2, fill=COLOR_EMPTY, outline="black")
                 text = self.canvas.create_text(x1 + BOX_SIZE//2, y1 + BOX_SIZE//2, text="", font=("Helvetica", 20, "bold"))
                 self.entries[i][j] = (rect, text)
-
+    
     def create_keyboard(self):
         keys = [
             "QWERTYUIOP",
             "ASDFGHJKL",
             "ZXCVBNM"
         ]
+        self.master.bind("<Key>", self.handle_keypress)
+
         self.keyboard_buttons = {}
         for r, row in enumerate(keys):
             frame = tk.Frame(self.master)
@@ -66,6 +68,11 @@ class WordleGUI:
         control_frame.grid(row=4, column=0, columnspan=10)
         tk.Button(control_frame, text="Enter", width=8, height=2, command=self.check_guess).grid(row=0, column=0, padx=5)
         tk.Button(control_frame, text="Del", width=8, height=2, command=self.delete_letter).grid(row=0, column=1, padx=5)
+        self.master.bind('<Return>', lambda event: self.check_guess())
+        self.master.bind('<BackSpace>', lambda event: self.delete_letter())
+    def handle_keypress(self, event):
+        if event.char.isalpha() and len(event.char) == 1:
+            self.add_letter(event.char.lower())
 
     def add_letter(self, letter):
         if len(self.current_guess) < WORD_LENGTH:
@@ -84,10 +91,11 @@ class WordleGUI:
         if len(guess) != WORD_LENGTH:
             messagebox.showinfo("Error", "Not enough letters.")
             return
-
-        if guess not in WORD_LIST:
-            messagebox.showinfo("Error", "Not a valid word.")
-            return
+        
+    # this lines could be added if we want to display the user if the choosen word is in our word list or not 
+        # if guess not in WORD_LIST:
+        #     messagebox.showinfo("Error", "Not a valid word.")
+        #     return
 
         # Evaluate guess
         target = list(TARGET_WORD)
@@ -98,34 +106,24 @@ class WordleGUI:
         for i in range(WORD_LENGTH):
             if guess_list[i] == target[i]:
                 result[i] = "correct"
-                target[i] = None  # Mark as used
-
-        # Check present letters
-        for i in range(WORD_LENGTH):
-            if result[i] == "correct":
-                continue
-            if guess_list[i] in target:
+            elif guess_list[i] in target:
                 result[i] = "present"
                 target[target.index(guess_list[i])] = None
 
         # Apply colors
         for i in range(WORD_LENGTH):
-            color = COLOR_ABSENT
+            btn = self.keyboard_buttons.get(guess_list[i])
             if result[i] == "correct":
                 color = COLOR_CORRECT
+                btn.config(bg=COLOR_CORRECT)
             elif result[i] == "present":
                 color = COLOR_PRESENT
+                btn.config(bg=COLOR_PRESENT)
+            else:
+                color = COLOR_ABSENT
+                btn.config(bg=COLOR_ABSENT)
 
             self.canvas.itemconfig(self.entries[self.attempt][i][0], fill=color)
-
-            btn = self.keyboard_buttons.get(guess_list[i])
-            if btn:
-                if result[i] == "correct":
-                    btn.config(bg=COLOR_CORRECT)
-                elif result[i] == "present" and btn.cget("bg") != COLOR_CORRECT:
-                    btn.config(bg=COLOR_PRESENT)
-                elif btn.cget("bg") not in (COLOR_CORRECT, COLOR_PRESENT):
-                    btn.config(bg=COLOR_ABSENT)
 
         # Check win
         if guess == TARGET_WORD:
